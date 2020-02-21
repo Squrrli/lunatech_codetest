@@ -1,0 +1,22 @@
+{
+  "name": "lunatech_codetest",
+  "version": "1.0.0",
+  "description": "Country - Airport REST API",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Squrrli/lunatech_codetest.git"
+  },
+  "author": "Adam O Mahony",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Squrrli/lunatech_codetest/issues"
+  },
+  "homepage": "https://github.com/Squrrli/lunatech_codetest#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
