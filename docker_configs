@@ -13,3 +13,15 @@ COPY ./countries-assembly-*.jar ./service.jar
 CMD ["java", "-jar", "./service.jar"]
 
 * --- docker-compose.yml --- *
+version: '3'
+
+services:
+  airport-service:
+    build: ./airport-service
+    ports:
+      - 8001:8080
+
+  countries-service:
+    build: ./countries-service
+    ports:
+      - 8002:8080
