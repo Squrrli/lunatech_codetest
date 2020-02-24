@@ -52,16 +52,18 @@ function enrichData(data) {
             country.airports.push(airport);            
         }
     }
+    console.log("finished enriching data.");    
     return countries;
 }
 
 /* Create a dictionary from country data to avoid having to loop each time to find country */
 function createDictionary(data) {
+    console.log("creating country dict...");
     let dict = {};
     for(let i = 0; i < data.length; i++) {
         let key = data[i]['code'];
         dict[key] = i;
-    }
+    
     return dict;
 }
 
@@ -73,18 +75,21 @@ app.get('/', (req, res) => {
     countriesPromise()
         .then( json => {
             countryData = json;
-        }).catch( err => console.error(err) );
+        }).catch( err =>  {
+            console.error(err);
+            res.status(500).send("Internal Server error 500");   
+        });
 });
 
 app.get('/countryairportsummary', (req, res) => {
-    console.log("countryairportsummary endpoint hit");
+    console.log("/countryairportsummary endpoint hit");
     Promise.all([countriesPromise(), airportsPromise()])
         .then( json => {
-            // console.log(json);
             res.json(enrichData(json));
         })
         .catch( (err) => {
             console.error(err);
+            res.status(500).send("Internal Server error 500");
         });
 });
 
