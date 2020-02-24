@@ -43,22 +43,14 @@ function enrichData(data) {
     let airports = data[1];
     const countryDictonary = createDictionary(countries);
 
-    // TODO: save each country data as key value pairs: "code" : {  ... ,
-    //                                                              "code": String,
-    //                                                              ...
-    //                                                            }
-    // initial process removes need to iterate on each airport, O(n^2) => O(n)
-
-    for(let i=0; i < countries.length; i++) {
-        let country = countries[i];
-        country.airports = [];
-        for(let j = 0; j < 50; j++) {
-            let airport = airports[j]
-            if(airport['runways'].length > 0 && airport['iso_country'] === country['code']) {
-                // add airport to country data
-                country.airports.push(airport);
-            }
-        }    
+    for(let i=0; i < airports.length; i++) {
+        let airport = airports[i]
+        if(airport['runways'].length > 0) {
+            // add airport to country data
+            let country = countries[countryDictonary[airport.iso_country]]; // Get country corrosponding with iso_country value in airport
+            country.airports = [];
+            country.airports.push(airport);            
+        }
     }
     return countries;
 }
@@ -70,7 +62,7 @@ function createDictionary(data) {
         let key = data[i]['code'];
         dict[key] = i;
     }
-    console.log(dict);
+    return dict;
 }
 
 // ---- Routes ----
