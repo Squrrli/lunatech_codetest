@@ -4,8 +4,9 @@ const request = require('request');
 
 const app = express();
 
-const airport_service_url = 'http://127.0.0.1:8080/airports?full=1';
-const country_service_url = 'http://127.0.0.1:8080/countries';
+// Services running in seperate Docker containers to allow both be accessed at their specified port: 8080
+const airport_service_url = 'http://127.0.0.1:8001/airports?full=1';
+const country_service_url = 'http://127.0.0.1:8002/countries';
 
 const countriesPromise = () => 
 { return new Promise( (resolve, reject) => {
@@ -32,31 +33,63 @@ const airportsPromise = () =>
 }
 
 
-function enrichAirportData(data) {
+/* Enrich data received from the Airport and Countries services.
+ * data: Array, data[0] == countries array, data[1] == airports list.
+ * For each airport, if airport has runways, push onto list in corrosponding country obj
+*/
+function enrichData(data) {
     console.log("enriching data...");
+    let countries = data[0];
+    let airports = data[1];
+    const countryDictonary = createDictionary(countries);
 
-    /* Note: Data stored in first element of array -> List of airports in data[0]. */
-    let counter = 0;
-    for(let i = 0; i < data[0].length; i++) {
-        let airport = data[0][i];
-        if(airport['runways'].length > 0) counter++;
-        // console.log(data[0][i]);
+    // TODO: save each country data as key value pairs: "code" : {  ... ,
+    //                                                              "code": String,
+    //                                                              ...
+    //                                                            }
+    // initial process removes need to iterate on each airport, O(n^2) => O(n)
+
+    for(let i=0; i < countries.length; i++) {
+        let country = countries[i];
+        country.airports = [];
+        for(let j = 0; j < 50; j++) {
+            let airport = airports[j]
+            if(airport['runways'].length > 0 && airport['iso_country'] === country['code']) {
+                // add airport to country data
+                country.airports.push(airport);
+            }
+        }    
     }
-    console.log("total: ", data[0].length);
-    console.log("with runways: ", counter);
+    return countries;
+}
+
+/* Create a dictionary from country data to avoid having to loop each time to find country */
+function createDictionary(data) {
+    let dict = {};
+    for(let i = 0; i < data.length; i++) {
+        let key = data[i]['code'];
+        dict[key] = i;
+    }
+    console.log(dict);
 }
 
 // ---- Routes ----
+
+// TODO: reroute to /countryairportsummary endpoint
 app.get('/', (req, res) => {
     res.send("Lunatech code test: Country - Airport API");
+    countriesPromise()
+        .then( json => {
+            countryData = json;
+        }).catch( err => console.error(err) );
 });
 
 app.get('/countryairportsummary', (req, res) => {
     console.log("countryairportsummary endpoint hit");
-    Promise.all([airportsPromise()])
-        .then( (json) => {
+    Promise.all([countriesPromise(), airportsPromise()])
+        .then( json => {
             // console.log(json);
-            enrichAirportData(json);
+            res.json(enrichData(json));
         })
         .catch( (err) => {
             console.error(err);
