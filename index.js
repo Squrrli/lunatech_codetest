@@ -63,7 +63,7 @@ function createDictionary(data) {
     for(let i = 0; i < data.length; i++) {
         let key = data[i]['code'];
         dict[key] = i;
-    
+    }
     return dict;
 }
 
