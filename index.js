@@ -1,6 +1,5 @@
 const express = require('express');
 const fetch = require('node-fetch');
-const request = require('request');
 
 const app = express();
 
@@ -69,16 +68,8 @@ function createDictionary(data) {
 
 // ---- Routes ----
 
-// TODO: reroute to /countryairportsummary endpoint
 app.get('/', (req, res) => {
-    res.send("Lunatech code test: Country - Airport API");
-    countriesPromise()
-        .then( json => {
-            countryData = json;
-        }).catch( err =>  {
-            console.error(err);
-            res.status(500).send("Internal Server error 500");   
-        });
+    res.status(404).send("404 Not Found");
 });
 
 app.get('/countryairportsummary', (req, res) => {
