@@ -4,6 +4,7 @@
   "description": "Country - Airport REST API",
   "main": "index.js",
   "scripts": {
+    "start": "docker-compose up & node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
