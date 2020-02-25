@@ -4,14 +4,13 @@ const fetch = require('node-fetch');
 const app = express();
 
 // Services running in seperate Docker containers to allow both be accessed at their specified port: 8080
-const airport_service_url = 'http://127.0.0.1:8001/airports?full=1';
-const country_service_url = 'http://127.0.0.1:8002/countries';
+const airport_service_url = 'http://127.0.0.1:8001';
+const country_service_url = "http://127.0.0.1:8002";
 
 const countriesPromise = () => 
 { return new Promise( (resolve, reject) => {
-    fetch(country_service_url)
-        .then( (res) => res.json() )
-        .then( (json) => resolve(json) )
+    fetch(country_service_url + '/countries')
+        .then( (res) => resolve(res.json()) )
         .catch( (err) => {
             console.log("Error while retreiving countries: ", err);
             reject(err);
@@ -21,9 +20,8 @@ const countriesPromise = () =>
 
 const airportsPromise = () => 
 { return new Promise( (resolve, reject) => {
-    fetch(airport_service_url)
-        .then( (res) => res.json() )
-        .then( (json) => resolve(json) )
+    fetch(airport_service_url + '/airports?full=1')
+        .then( (res) => resolve(res.json()))
         .catch( (err) => {
             console.log("Error while retreiving airports: ", err);
             reject(err);
@@ -77,11 +75,27 @@ app.get('/countryairportsummary', (req, res) => {
     Promise.all([countriesPromise(), airportsPromise()])
         .then( json => {
             res.json(enrichData(json));
-        })
-        .catch( (err) => {
+        }, err => {
             console.error(err);
-            res.status(500).send("Internal Server error 500");
+            res.status(500).send("503 - Service Unavailable.    ");
         });
 });
+
+app.get('/countries(/:qry)?', (req, res) => {
+    console.log("request to: ", req.path + req.query);
+    res.redirect(country_service_url + req.path);    
+});
+
+app.get('/airports(/:qry)?', (req, res) => {
+    if(req.query.full !== undefined) {
+        res.redirect(airport_service_url + "/airports?full=1");
+    } else {
+        res.redirect(airport_service_url + req.path);
+    }    
+});
+
+// app.get('/airports?full', (req, res) => {
+//     res.redirect(country_service_url + req.path);    
+// });
 
 app.listen(8080, () => console.log("Listening on port 8080..."));
