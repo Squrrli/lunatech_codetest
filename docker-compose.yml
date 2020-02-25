@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+
+  airport-service:
+    build: ./airport-service
+    ports:
+      - 8001:8080
+
+  countries-service:
+    build: ./countries-service
+    ports:
+      - 8002:8080
